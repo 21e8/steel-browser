@@ -13,6 +13,7 @@ type AuthPluginOptions = {
 
 const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (fastify, options) => {
   const authToken = options.authToken || process.env.AUTH_TOKEN;
+  fastify.log.warn("No auth token configured - server will run without authentication");
 
   fastify.decorateRequest("isAuthenticated", false);
 
@@ -20,7 +21,6 @@ const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (fastify, option
     const token = request.headers.authorization?.replace("Bearer ", "");
 
     if (!authToken) {
-      fastify.log.warn("No auth token configured - server will run without authentication");
       done();
       return;
     }
