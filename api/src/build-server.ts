@@ -20,7 +20,7 @@ export default function buildFastifyServer(options?: FastifyServerOptions) {
   server.register(requestLogger);
   server.register(fastifySensible);
   server.register(fastifyCors, { origin: true });
-  server.register(authPlugin, { authToken: config.authToken });
+  // server.register(authPlugin, { authToken: config.authToken });
   server.register(openAPIPlugin);
   server.register(browserInstancePlugin);
   server.register(seleniumPlugin);
