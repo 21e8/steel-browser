@@ -14,17 +14,16 @@ type AuthPluginOptions = {
 const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (fastify, options) => {
   const authToken = options.authToken || process.env.AUTH_TOKEN;
 
-  if (!authToken) {
-    fastify.log.warn("No auth token configured - server will run without authentication");
-    return;
-  }
-
-  fastify.log.info("Initializing auth middleware");
-
   fastify.decorateRequest("isAuthenticated", false);
 
   fastify.addHook("onRequest", (request, reply, done) => {
     const token = request.headers.authorization?.replace("Bearer ", "");
+
+    if (!authToken) {
+      fastify.log.warn("No auth token configured - server will run without authentication");
+      done();
+      return;
+    }
 
     // Skip auth for WebSocket upgrade requests
     if (request.raw.headers.upgrade === "websocket") {
