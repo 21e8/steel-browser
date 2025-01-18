@@ -23,32 +23,36 @@ const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (fastify, option
 
   fastify.decorateRequest("isAuthenticated", false);
 
-  fastify.addHook("onRequest", async (request, reply) => {
+  fastify.addHook("onRequest", (request, reply, done) => {
     const token = request.headers.authorization?.replace("Bearer ", "");
 
     // Skip auth for WebSocket upgrade requests
     if (request.raw.headers.upgrade === "websocket") {
       request.isAuthenticated = true;
+      done();
       return;
     }
 
     if (!token) {
       fastify.log.warn("Request rejected - no auth token provided");
       reply.status(401).send({ error: "Authentication required" });
+      done();
       return;
     }
 
     if (token !== authToken) {
       fastify.log.warn("Request rejected - invalid auth token");
       reply.status(401).send({ error: "Invalid authentication token" });
+      done();
       return;
     }
 
     request.isAuthenticated = true;
     fastify.log.debug("Request authenticated successfully");
+    done();
   });
 };
 
 export default fp(authPlugin, {
   name: "auth-plugin",
-}); 
+});
